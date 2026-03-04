@@ -1,12 +1,13 @@
 import os
 import random
 import requests
-from flask import Flask, request, abort
+from flask import Flask, request
 
 app = Flask(__name__)
 
 # --- 請在這裡填入你的資料 ---
-CHANNEL_ACCESS_TOKEN = "你的AccessToken"  # 這裡要換成你從 LINE 後台複製的長字串
+# 記得把下面括號裡的文字，換成你在 LINE Developers 後台看到的 Long-lived Access Token
+CHANNEL_ACCESS_TOKEN = "你的AccessToken" 
 # ------------------------
 
 questions = [
@@ -49,7 +50,6 @@ def callback():
                     correct = user_state[user_id]["answer"]
                     if message == correct:
                         reply_message(reply_token, "✅ 答對了！輸入『開始』下一題")
-                        user_state.pop(user_id, None)
                     else:
                         reply_message(reply_token, f"❌ 答錯，正確答案是 {correct}\n輸入『開始』再來一題")
             else:
@@ -59,3 +59,4 @@ def callback():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
+
