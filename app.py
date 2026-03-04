@@ -5,10 +5,9 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-# --- 請在這裡填入你的資料 ---
-# 記得把下面括號裡的文字，換成你在 LINE Developers 後台看到的 Long-lived Access Token
+# --- 這裡請貼上你的 LINE Token ---
 CHANNEL_ACCESS_TOKEN = "你的AccessToken" 
-# ------------------------
+# -----------------------------
 
 questions = [
     {"q": "死亡職災幾小時內通報？\n1.8小時\n2.24小時\n3.48小時\n4.72小時", "answer": "1"},
@@ -18,45 +17,40 @@ questions = [
 
 user_state = {}
 
-def reply_message(reply_token, text):
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}"
-    }
-    body = {
-        "replyToken": reply_token,
-        "messages":
-    }
-    requests.post("https://api.line.me", headers=headers, json=body)
+@app.route("/", methods=['GET'])
+def index():
+    return "機器人運行中！"
 
 @app.route("/callback", methods=['POST'])
 def callback():
     data = request.json
     if not data or 'events' not in data:
         return 'OK'
-    
     for event in data['events']:
         if event.get('type') == 'message' and event['message'].get('type') == 'text':
             reply_token = event['replyToken']
             user_id = event['source']['userId']
             message = event['message']
-
             if message == "開始":
-                question = random.choice(questions)
-                user_state[user_id] = question
-                reply_message(reply_token, "📘 題目：\n" + question["q"])
+                q = random.choice(questions)
+                user_state[user_id] = q
+                send_reply(reply_token, "📘 題目：\n" + q["q"])
             elif message in ["1", "2", "3", "4"]:
                 if user_id in user_state:
                     correct = user_state[user_id]["answer"]
                     if message == correct:
-                        reply_message(reply_token, "✅ 答對了！輸入『開始』下一題")
+                        send_reply(reply_token, "✅ 答對了！輸入『開始』下一題")
                     else:
-                        reply_message(reply_token, f"❌ 答錯，正確答案是 {correct}\n輸入『開始』再來一題")
+                        send_reply(reply_token, f"❌ 答錯，正確答案是 {correct}\n輸入『開始』再來一題")
             else:
-                reply_message(reply_token, "輸入『開始』開始測驗")
+                send_reply(reply_token, "輸入『開始』開始測驗")
     return 'OK'
+
+def send_reply(reply_token, text):
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}"}
+    body = {"replyToken": reply_token, "messages":}
+    requests.post("https://api.line.me", headers=headers, json=body)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
-
