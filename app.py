@@ -5,9 +5,9 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-# --- 這裡請貼上你的 LINE Token ---
+# --- 這裡填入你的 Token ---
 CHANNEL_ACCESS_TOKEN = "你的AccessToken" 
-# -----------------------------
+# ------------------------
 
 questions = [
     {"q": "死亡職災幾小時內通報？\n1.8小時\n2.24小時\n3.48小時\n4.72小時", "answer": "1"},
@@ -19,7 +19,7 @@ user_state = {}
 
 @app.route("/", methods=['GET'])
 def index():
-    return "機器人運行中！"
+    return "Bot is running!"
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -48,8 +48,8 @@ def callback():
 
 def send_reply(reply_token, text):
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {CHANNEL_ACCESS_TOKEN}"}
-    body = {"replyToken": reply_token, "messages":}
-    requests.post("https://api.line.me", headers=headers, json=body)
+    payload = {"replyToken": reply_token, "messages":}
+    requests.post("https://api.line.me", headers=headers, json=payload)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
